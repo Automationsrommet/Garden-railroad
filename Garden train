@@ -1,0 +1,147 @@
+ //Parametric wooden garden train to go with my modular garden railroad as engineered by Tim Rowe on the youtube channel "Way out West"
+//Programmed by Sveinar Sandvin in july 2021. Dedicated to Nikolai who turned 8 this spring.
+
+//Try animating: Activate animation in the View-menu, choose Steps: 36 and FPS: 10. 
+
+//Input parameters: 
+     
+gauge=7.9;
+gaugemm=gauge*25.4;
+kettlediameter=200;
+kettlelength=600;
+boardwidth=160;
+boardthickness=20;
+tenderlength=600;
+wheeldiameter=150;
+frontwheelbase=400;
+drivewheelbase=600;
+trainheigth=500;
+batterylength=200;
+valvediameter=110;
+detail=20;          // this should be higher to look OK
+sleeperheigth=50;
+pipediameter=16;
+pipediameterinner=10;
+
+
+//Output parameters:  
+locolength=kettlelength+600;
+
+
+$fn=detail;
+
+module wheel (section, axel,step) {
+    for (k=[-1:step:1]){
+    translate([section+ k*axel,0,-boardthickness-boardthickness/2-boardwidth + wheeldiameter/2-boardthickness])
+    for (i=[-1:2:1]){    
+    color("red")translate([0, i*(gaugemm/2+boardthickness/2),0])rotate([(i+2)*90,0,0])cylinder(boardthickness/2,wheeldiameter/2+boardthickness/2,wheeldiameter/2+boardthickness/2, center=true);
+    difference(){color("red")translate([0, i*(gaugemm/2+boardthickness),0])rotate([(i+2)*90,0,0])cylinder(boardthickness,wheeldiameter/2+boardthickness/2,wheeldiameter/2, center=true);
+    rotate([0,$t*360,0])for (l=[0:360/detail:360]){
+        color("white")rotate([0,l,0])translate([85, i*(gaugemm/2+boardthickness*1.5),0])cylinder(32,20,20,center=true);}}
+    translate([40*sin($t*36*10+90), i*(gaugemm/2+boardthickness*2),40*cos($t*36*10+90)])rotate([(i+2)*90,0,0])cylinder(boardthickness*2*abs(step-2),pipediameterinner/2,pipediameterinner/2, center=true); 
+    }
+    //tøffere
+    translate([section,0,-boardthickness-boardthickness/2-boardwidth + wheeldiameter/2-boardthickness])for (j=[-1:2:1]){
+    color("white")translate([-40*cos($t*36*10+180), j*(gaugemm/2+boardthickness*2.4-5),40*sin($t*36*10+180)])cube([drivewheelbase-wheeldiameter,boardthickness*abs(step-2),50],center=true);  
+    translate([60+40*sin($t*36*10+90), j*(gaugemm/2+boardthickness*2.8-10),40*cos($t*36*10+90)])rotate([90,0,0])cylinder(boardthickness*3*abs(step-2),pipediameterinner/2,pipediameterinner/2, center=true);
+        translate([-section,0,boardthickness+boardthickness/2+boardwidth - wheeldiameter/2+boardthickness])
+        translate([kettlelength-(wheeldiameter*2.5)/2+40*cos($t*36*10),j*(boardwidth+0.25*boardwidth-10), -0.25*boardwidth-boardthickness+20-20-6*sin($t*36*10+180)])
+        rotate([0,-8-5*sin($t*36*10),0])translate([-335,0,15])
+        color("white")cube([drivewheelbase-wheeldiameter, boardthickness*abs(step-2),50], center=true);
+translate([565+40*sin($t*36*10+90),j*(boardwidth+0.25*boardwidth+10),60])
+        color("white")cube([drivewheelbase-wheeldiameter*2.4, boardthickness*abs(step-2),50], center=true);
+translate([460+40*sin($t*36*10+90), j*(gaugemm/2+boardthickness*2.8+15),60])rotate([90,0,0])cylinder(boardthickness*3*abs(step-2),pipediameterinner/2,pipediameterinner/2, center=true);        
+}}}
+
+module axelpipe (section, axel,step) {
+    for (k=[-1:step:1]){
+    translate([section+ k*axel,0,-boardthickness-boardthickness/2-boardwidth + wheeldiameter/2-boardthickness])
+        difference(){
+    translate([0, 0,0])rotate([90,0,0])cylinder(gaugemm+4*boardthickness,pipediameter/2,pipediameter/2, center=true);
+    translate([0, 0,0])rotate([90,0,0])cylinder(gaugemm+5*boardthickness,pipediameterinner/2,pipediameterinner/2, center=true);
+    }}}
+
+module wheelbase (section, length, axel, step){
+    color("brown")difference(){union(){for (i=[-1:2:1]){ 
+   translate([section,0,-boardthickness-boardthickness/2])union(){translate([i*(length/2-boardthickness/2),0,-boardwidth/2])cube([boardthickness, gaugemm-2*boardthickness,boardwidth],center=true);
+    translate([0,i*(gaugemm/2-boardthickness),-boardwidth/2])cube([length, boardthickness,boardwidth],center=true);
+    }}}
+    union(){for (k=[-1:step:1]){
+    translate([section+ k*axel, 0,-boardthickness-boardthickness/2-boardwidth + wheeldiameter/2-boardthickness])rotate([90,0,0])cylinder(5*boardwidth,pipediameter,pipediameter, center=true);
+    }}}}
+    
+module pistonhouse (length){
+    color("black")for(i=[-1:2:1]){ 
+    difference(){
+translate([kettlelength-length/2, i*boardwidth, 0])rotate([0,90,0])cylinder(length, 0.5*boardwidth,0.5*boardwidth, center=true);
+translate([kettlelength-length/2, i*boardwidth, -length/2-boardthickness])cube([length+1,    length,length], center=true);}
+translate([kettlelength-length/2, i*(boardwidth+0.25*boardwidth), -0.135*boardwidth])cube([length, 0.5*boardwidth,0.5*boardwidth], center=true);
+translate([kettlelength-length/2, i*(boardwidth+0.25*boardwidth), -0.25*boardwidth-boardthickness])rotate([0,90,0])cylinder(length, 0.25*boardwidth,0.25*boardwidth, center=true);
+    }}
+    
+module planks (cutout, window)  {
+    for(i=[-1:2:1]){ 
+    translate([100,i*boardwidth/2,-boardthickness/2])cube([locolength, boardwidth,boardthickness],center=true);
+    difference(){
+    color("Gray")translate([-boardthickness/2,i*boardwidth/2,(trainheigth-wheeldiameter-3*boardthickness)/2])cube([boardthickness, boardwidth,(trainheigth-wheeldiameter-3*boardthickness)],center=true);
+color("white")translate([-boardthickness, i*kettlediameter*0.434,kettlediameter])rotate([0,90,0])cylinder(5*boardthickness,window/2,window/2,true);}
+difference(){
+    color("Gray")translate([-boardthickness-boardwidth/2,i*(boardwidth-boardthickness/2),(trainheigth-wheeldiameter-3*boardthickness)/2])cube([boardwidth, boardthickness,(trainheigth-wheeldiameter-3*boardthickness)],center=true);
+color("white")translate([-boardwidth-boardthickness, kettlediameter*0.434,kettlediameter])rotate([90,0,0])cylinder(5*boardwidth,cutout/2,cutout/2, center=true);
+}
+color("Gray")translate([-boardwidth/2,0,(trainheigth-wheeldiameter-3*boardthickness)+boardthickness/2])cube([boardwidth, 2*boardwidth,boardthickness],center=true);
+    } }
+    module plog(){color("red"){
+        for(i=[0:1:1]){ 
+       mirror([0,i,0]) 
+        difference(){    
+     intersection(){
+translate([kettlelength+boardwidth/2,boardwidth/2,-boardwidth*2/3])cube([boardwidth,boardwidth,boardwidth],center=true);
+translate([kettlelength+boardwidth/3,boardwidth/2,-boardwidth])rotate([30,-30,30])cube([boardthickness, 500,300],center=true);}  
+for(j=[0:1:3]){
+    translate([0,boardwidth*3/4-j*24,-boardwidth*0.9+j*20])rotate([0,90,0])cylinder(5000,pipediameter/2,pipediameter/2, center=true); 
+   translate([0,boardwidth*3/4-j*24,-boardwidth*0.9])rotate([0,90,0])cylinder(5000,pipediameter/2,pipediameter/2, center=true); 
+     translate([0,boardwidth*3/4-j*24,-boardwidth*0.9+j*10])cube([5000,pipediameter,j*20], center=true);
+}}}}}
+
+module batterybox(){
+    translate([100-locolength/2+batterylength/2+boardthickness,0,boardwidth/2])
+    for(i=[-1:2:1]){
+        for(j=[0:1:1]){
+    color("Gray")translate([i*(batterylength+boardthickness)/2,0,0+j*boardwidth])cube([boardthickness, 2*boardwidth-2*boardthickness,boardwidth],center=true);
+    color("Gray")translate([0,i*(boardwidth-boardthickness/2),0+j*boardwidth])cube([batterylength+2*boardthickness, boardthickness,boardwidth],center=true);
+            difference(){
+    color("Brown")translate([0,0,0+j*1.5*boardwidth])minkowski(){
+                sphere(15*j);
+                cube([batterylength+2*boardthickness, 2*boardwidth*j,50],center=true);}
+                translate([0,0,-12.5])cube([batterylength+2*boardthickness, 2*boardwidth*j,25],center=true);
+}}}}
+
+module lights(){
+    for (i=[-1:2:1]){
+    color("Gray")translate([kettlelength+50,i*(boardwidth-50),0])cube([30,60,140],center=true);
+        color("red")translate([kettlelength+90,i*(boardwidth-60),-50])rotate([0,90,0])cylinder(60,20,20,center=true);
+        color("red")translate([kettlelength+106,i*(boardwidth-60),-50])rotate([0,90,0])cylinder(20,25,24,center=true);
+        color("yellow")translate([kettlelength+68,i*(boardwidth-40),+50])rotate([0,90,0])cylinder(10,25,24,center=true);
+        color("gray")translate([kettlelength+10,0,+190])rotate([0,90,0])cylinder(30,30,30,center=true);
+        color("yellow")translate([kettlelength+30,0,+190])rotate([0,90,0])cylinder(10,28,26,center=true);
+    }}
+// Some things are outside of modules here
+color("Gray") 
+translate([kettlelength/2, 0,kettlediameter/2])rotate([0,90,0])cylinder(kettlelength,kettlediameter/2,kettlediameter/2, center=true);
+        color("Gray")difference(){translate([kettlelength-wheeldiameter/2, 0, kettlediameter])cylinder(2*kettlediameter,0, boardwidth/2, center=true);
+        translate([kettlelength-wheeldiameter/2, 0, kettlediameter])cylinder(2*kettlediameter+1,kettlediameter/6, kettlediameter/6, center=true);}
+     color("Gray")translate([(kettlelength-wheeldiameter/2)/2, 0, kettlediameter])cylinder(kettlediameter,valvediameter/2, valvediameter/2, center=true);
+        color("Gray")translate([(kettlelength-wheeldiameter/2)/2, 0, kettlediameter+kettlediameter/2])sphere(valvediameter/2);
+// calling modules here at the end       
+lights();
+planks(kettlediameter,kettlediameter/3 );
+wheelbase (kettlelength*0.66,frontwheelbase,frontwheelbase/4,2);
+wheelbase (-kettlelength*0.3,drivewheelbase,drivewheelbase/3,1);
+axelpipe(kettlelength*0.66, frontwheelbase/4,2);
+axelpipe(-kettlelength*0.3, drivewheelbase/3,1 );
+wheel(kettlelength*0.66, frontwheelbase/4,2 );
+wheel(-kettlelength*0.3, drivewheelbase/3,1 );
+pistonhouse(wheeldiameter*1.5);
+plog();
+batterybox();
