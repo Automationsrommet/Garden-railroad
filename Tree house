@@ -1,0 +1,88 @@
+//This is a treehouse I hope to build on a treestub in our garden some day.
+
+//Input parameters:
+treedia=800;
+treeheigth=1200;
+legdim=50;
+raftdim=100;
+rail=800;
+housedia=2000;
+plankthick=36;
+plank=75;
+margin=3;
+parasolpole=40;
+step=200;
+
+module tree(){
+    color("green")cylinder(treeheigth,treedia/2,treedia/2, center=true);
+}
+module legs(){
+    for (i=[0:90:360]){
+    rotate([0,0,i])translate([treedia/2+legdim/2, 0,treeheigth/2])color("yellow")rotate([0,0,45])cube([legdim,legdim,2*treeheigth],center=true);
+}}
+module raft(){
+    color("orange")for (j=[-1:2:1]){
+  translate([j*(treedia/(2*sqrt(2))-legdim/2), j*(treedia/(2*sqrt(2))-legdim/2),treeheigth/2+raftdim/2])rotate([0,0,-45])cube([housedia, legdim, raftdim], center=true);
+}}
+module planks() {
+ rotate([0,0,45])for (j=[-housedia/2:plank+margin:housedia/2]){
+  translate([0,j,treeheigth/2+raftdim+plankthick/2])color("grey")cube([(housedia-treedia/sqrt(2))*cos(j*180/housedia)+treedia/sqrt(2), plank, plankthick], center=true);
+}   
+}
+
+module roofcross(){
+   for (i=[0:90:360]){
+       for (j=[-1:2:1]){
+    rotate([0,0,i])translate([(treedia/2+legdim/2), 0,treeheigth*1.5])color("yellow")rotate([0,45,j*45])cube([legdim,legdim,housedia*0.75],center=true);
+}} 
+}
+module railing(){
+  for (j=[-1:2:1]){
+      for (k=[-1:2:1]){
+  translate([j*(treedia/(2*sqrt(2))-legdim/2)+k*(housedia/(2*sqrt(2))-legdim/2), j*(treedia/(2*sqrt(2))-legdim/2)-k*(housedia/(2*sqrt(2))-legdim/2),treeheigth/2+raftdim/2+rail/2+plankthick])rotate([0,0,-45])color("orange")cube([legdim, legdim, rail+raftdim+plankthick], center=true);
+          
+     rotate([0,0,45])for (l=[-housedia/2+legdim:(plank+margin)*3:housedia/2-legdim]){
+  translate([k*((housedia-treedia/sqrt(2))*cos(l*180/housedia)+treedia/sqrt(2))/2,l,treeheigth/2+raftdim/2+rail/2+plankthick]){color("orange")cube([legdim, legdim, rail+raftdim+plankthick-2*legdim], center=true);
+      translate([0,0,(rail+raftdim+plankthick-legdim)/2])color("grey")rotate([0,0,k*90*sin((l*90/housedia))])cube([legdim, (plank+margin)*5, legdim], center=true);
+}   }
+}  }}
+
+module loft(){
+    color("grey")difference(){
+    for(i=[-treedia/2-margin:plank+margin:treedia/2+margin]){
+        translate([i,0,1.5*treeheigth+plankthick])cube([plank,treedia-2*abs(i), plankthick],center=true);
+    }
+    cylinder(4*treeheigth,parasolpole/2+margin,parasolpole/2+margin, center=true);
+    }
+    color("orange")for (j=[-1:2:1]){
+        for (k=[0:90:90]){
+  rotate([0,0,k])translate([j*(treedia/(2*sqrt(2))-4*legdim/2), j*(treedia/(2*sqrt(2))-4*legdim/2),1.5*treeheigth-plankthick])rotate([0,0,-45])cube([treedia/sqrt(2), legdim, raftdim], center=true);
+    }}
+    }
+module parasol(){
+  color("white")translate([0,0,1.4*treeheigth+plankthick])cylinder(1.6*treeheigth-2*raftdim,parasolpole/2,parasolpole/2, center=true); 
+   color("green")intersection (){
+   translate([0,0,1.95*treeheigth+plankthick])cylinder(0.5*treeheigth,housedia,housedia, center=true);
+       translate([0,0,0.45*treeheigth+plankthick])difference(){sphere(housedia); 
+    sphere(housedia-margin);       }
+       }
+}
+module ladder(){
+    for (i=[-1:2:1]){
+        for (j=[-1:2:1]){
+    for (k=[0:-step:-treeheigth+raftdim]){    
+   rotate([0,0,45])translate([0,i*housedia/2,treeheigth/2+raftdim])translate([0,0,k]){color("white")cube([treedia/sqrt(2),legdim,legdim],center=true);
+       translate([(treedia/sqrt(2))/2*j,0,-step/2]) color("beige")cylinder(step,legdim/2,legdim/2,center=true);
+   }  rotate([0,0,45])translate([0,i*treedia/2,treeheigth*1.5+plankthick/2])translate([0,0,k]){color("white")cube([treedia/sqrt(2),legdim,legdim],center=true);
+       translate([(treedia/sqrt(2))/2*j,0,-step/2]) color("beige")cylinder(step,legdim/2,legdim/2,center=true);
+}}}}}
+
+tree();
+legs();
+raft();
+planks();
+roofcross();
+railing();
+loft();
+parasol();
+ladder();
