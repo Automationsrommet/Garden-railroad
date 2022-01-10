@@ -1,0 +1,178 @@
+//Modular garden railroad as engineered by Tim Rowe on the youtube channel "Way out West"
+//Programmed by Sveinar Sandvin in april 2021. Dedicated to Nikolai who turns 8 these days.
+
+//The idea with parametric code here is that only the input parameters need changing and the rest should be rendering beautifully from those values. Sadly the turns takes forever to render 
+
+
+//Input parameters: 
+turnorstraight=1;    // 1 for straight, 2 for turn, 3 for fishplates
+turnradius=10000;     
+gauge=15;
+gaugemm=gauge*25.4;
+steelwidth=4;
+steelheigth=50;
+detail=70;
+sleepermargin=100;
+sleeperheigth=50;
+sleeperwidth=100;
+turndegrees=30;
+sleepers=7;
+pipediameter=16;
+pipediameterinner=10;
+screwdiameter=6;
+screwhead=15;
+nutheigth=5;
+nutdimention=10;
+straightlength=5000;
+fishplatedistance=400;
+steelkgperliter=7.85;
+woodkgperliter=0.85;  //this value is for raw birch and is probably a high estimate.
+
+
+//Output parameters:   (weight calculations are not done, I'm afraid)
+sleeperlength=sleepermargin*2+steelwidth*2+gaugemm;
+sleeperweight=sleeperlength*sleeperwidth*sleeperheigth*woodkgperliter;
+//straightweight=
+sleepereverystraight=0.001*(straightlength-2*fishplatedistance)/(sleepers-1);
+fullcirclemm=PI*2*turnradius;
+millimetersperdegree=fullcirclemm/(360*1000);
+degreespermillimeter=(1/millimetersperdegree);
+turnlength=turndegrees*millimetersperdegree;
+turnbody=1000*turnlength-2*fishplatedistance;
+halfturn=1000*turnlength/2;
+sleepereveryturn=turnbody/(sleepers-1);
+turnweight=turnlength*2*steelheigth*steelwidth*0.000001*steelkgperliter+sleeperweight*sleepers;
+screwsneeded=0;
+pipemeterneeded=0;
+
+//The code part where I am quite proud of my current level of OpenScad programming.
+$fn=detail;
+if (turnorstraight==1){  //Here is the code for straight tracks
+    
+       echo ("Sleeper distance on straight is ",sleepereverystraight, "meters.");
+    
+    for (l=[-straightlength/2+(fishplatedistance-1):1000*sleepereverystraight:straightlength/2-(fishplatedistance-1)]){
+        //sleepers on straight
+        color([0.9,0.5,0.2])translate([0,l,-sleeperheigth/2])cube([sleeperlength,sleeperwidth,sleeperheigth], center=true);  
+      difference(){union(){
+     for (k=[-1:2:1]){
+         //Steel tracks
+    color([0.3,0.2,0.3])translate([k*(gaugemm/2+steelwidth/2),0,steelheigth/2])cube([steelwidth,straightlength,steelheigth], center=true);    
+    difference(){
+        //Pipe outer object
+         color([0.3,0.6,0.2])translate([k*(gaugemm/2+steelwidth+pipediameter/2),l,steelheigth-(sleeperheigth+steelheigth)/2])cylinder(sleeperheigth+steelheigth,pipediameter/2,pipediameter/2, center=true);
+        //Pipe inner object
+    translate([k*(gaugemm/2+steelwidth+pipediameter/2),l,steelheigth-(sleeperheigth+steelheigth)/2])cylinder(sleeperheigth+steelheigth,pipediameterinner/2,pipediameterinner/2, center=true);
+    }
+    //The threaded part of the bolts
+         color([0.7,0.8,0.1])translate([k*(gaugemm/2+steelwidth+pipediameter/2+nutheigth/2),l,steelheigth/2])rotate([0,90,0])cylinder(pipediameter+steelwidth+nutheigth*3,screwdiameter/2,screwdiameter/2, center=true);
+    //Square nut
+    color([0.7,0.8,0.6])translate([k*(gaugemm/2+steelwidth+pipediameter+nutheigth/2),l,steelheigth/2])rotate([0,90,0])cube([nutdimention,nutdimention,nutheigth], center=true);
+    //bolt heads
+    intersection(){
+                    color([0.7,0.8,0.1])translate([k*(gaugemm/2-steelwidth),l,steelheigth/2])rotate([0,90,0])cylinder(screwhead/2,screwhead/2,screwhead/2, center=true);
+                    color([0.7,0.8,0.1])translate([k*(gaugemm/2+1.5*steelwidth),l,steelheigth/2])rotate([0,90,0])sphere(screwhead/2+steelwidth);
+                }
+         }     
+    }
+    union(){
+        
+    for (m=[-straightlength/2+(fishplatedistance-1):1000*sleepereverystraight:straightlength/2-(fishplatedistance-1)]){
+       //Holes in steel tracks with every sleeper   
+    translate([0,m,steelheigth/2])rotate([0,90,0])cylinder(sleeperlength,screwdiameter/2,screwdiameter/2, center=true); 
+        //Holes in the minus side end for the fishplate
+    translate([0,-straightlength/2+20,steelheigth/2])rotate([0,90,0])cylinder(sleeperlength,screwdiameter/2,screwdiameter/2, center=true); 
+        //Holes in the plus side end for the fishplate
+        translate([0,straightlength/2-20,steelheigth/2])rotate([0,90,0])cylinder(sleeperlength,screwdiameter/2,screwdiameter/2, center=true); 
+        
+    } } } 
+    }
+    }
+if (turnorstraight==2){   //Here is the code for the turn
+    for (i=[0:0.1:turndegrees]){
+        difference(){
+        union(){  
+   //Tracks in turn         
+    color([0.3,0.2,0.3])rotate([0,0,i])translate([turnradius+gaugemm/2+steelwidth/2,0,steelheigth/2])cube([steelwidth,2*(turnradius+gaugemm/2+steelwidth/2)*PI/3600,steelheigth], center=true);
+    color([0.3,0.2,0.3])rotate([0,0,i])translate([turnradius-gaugemm/2-steelwidth/2,0,steelheigth/2])cube([steelwidth,2*(turnradius+gaugemm/2+steelwidth/2)*PI/3600,steelheigth], center=true);
+        }
+        //hole in outer end
+        rotate([0,0,0.1])translate([turnradius,0,steelheigth/2])rotate([0,90,0])cylinder(sleeperlength,screwdiameter/2,screwdiameter/2, center=true);
+        rotate([0,0,turndegrees-0.15])translate([turnradius,0,steelheigth/2])rotate([0,90,0])cylinder(sleeperlength,screwdiameter/2,screwdiameter/2, center=true);
+        for (t=[fishplatedistance-1:(sleepereveryturn):(turnlength*1000)-fishplatedistance+1]){
+        //holes in tracks for screws with every sleeper
+           rotate([0,0,(t/fullcirclemm)*360])translate([turnradius,0,steelheigth/2])rotate([0,90,0])cylinder(sleeperlength,screwdiameter/2,screwdiameter/2, center=true); 
+        }
+    }    }
+   for (s=[fishplatedistance-1:(sleepereveryturn):(turnlength*1000)-fishplatedistance+1]){
+           //Sleepers in turn
+color([0.9,0.5,0.2])rotate([0,0,(s/fullcirclemm)*360])translate([turnradius,0,-sleeperheigth/2])cube([sleeperlength,sleeperwidth,sleeperheigth], center=true);
+       for (j=[-1:2:1]){
+       difference(){
+           union(){
+               //Pipe outer object
+    color([0.3,0.6,0.2])rotate([0,0,(s/fullcirclemm)*360])translate([turnradius+j*gaugemm/2+j*steelwidth+j*pipediameter/2,0,steelheigth-(sleeperheigth+steelheigth)/2])cylinder(sleeperheigth+steelheigth,pipediameter/2,pipediameter/2, center=true);
+            //Square nut as seen on Youtube
+               color([0.7,0.8,0.6])rotate([0,0,(s/fullcirclemm)*360])translate([turnradius+j*(gaugemm/2+steelwidth+pipediameter+nutheigth/2),0,steelheigth/2])rotate([0,90,0])cube([nutdimention,nutdimention,nutheigth], center=true);
+               //The threaded part of the bolts 
+               color([0.7,0.8,0.1])rotate([0,0,(s/fullcirclemm)*360])translate([turnradius+j*(gaugemm/2+steelwidth+pipediameter/2+nutheigth/2),0,steelheigth/2])rotate([0,90,0])cylinder(pipediameter+steelwidth+nutheigth*3,screwdiameter/2,screwdiameter/2, center=true);       
+               }
+               //holes through the pipe and perhaps the nut too
+            rotate([0,0,(s/fullcirclemm)*360])translate([turnradius,0,steelheigth/2])rotate([0,90,0])cylinder(sleeperlength,screwdiameter/2,screwdiameter/2, center=true);
+            //Pipe inner object
+               rotate([0,0,(s/fullcirclemm)*360])translate([turnradius+j*gaugemm/2+j*steelwidth+j*pipediameter/2,0,0])cylinder(sleeperheigth+steelheigth,pipediameterinner/2,pipediameterinner/2, center=true);            
+           }
+           //The bolt heads
+           intersection(){
+           color([0.7,0.8,0.1])rotate([0,0,(s/fullcirclemm)*360])translate([turnradius+j*(gaugemm/2-steelwidth),0,steelheigth/2])rotate([0,90,0])cylinder(screwhead/2,screwhead/2,screwhead/2, center=true);
+    color([0.7,0.8,0.1])rotate([0,0,(s/fullcirclemm)*360])translate([turnradius+j*(gaugemm/2+1.5*steelwidth),0,steelheigth/2])rotate([0,90,0])sphere(screwhead/2+steelwidth);
+               }
+          }
+
+}
+echo ("This turn is ",millimetersperdegree," meters per degree");
+
+echo ("and the turn length is",turnlength, "meters in total");
+  
+    echo ("Sleeper distance on turn is ",sleepereveryturn, "millimeters.");
+}
+if (turnorstraight==3){   // Here is the fishplate that connects the longer segments.
+    for (n=[-1:2:1]){
+        difference(){
+            union(){
+        difference(){
+            //The sleeper
+    color([0.9,0.5,0.2])translate([0,0,-sleeperheigth/2])cube([sleeperlength,sleeperwidth,sleeperheigth], center=true);
+            //Here I tried to cut a notch in the sleeper for the angle iron base.
+            color([0.3,0.2,0.3])translate([n*0.5*(gaugemm-steelheigth+steelwidth*2),0,-steelwidth/2])cube([steelheigth,2*sleeperwidth,steelwidth], center=true);
+        }
+        //Angle iron
+    color([0.3,0.2,0.3])translate([n*(gaugemm/2+steelwidth/2),0,steelheigth/2])cube([steelwidth,2*sleeperwidth,steelheigth], center=true);
+    color([0.3,0.2,0.3])translate([n*0.5*(gaugemm-steelheigth+steelwidth*2),0,-steelwidth/2])cube([steelheigth,2*sleeperwidth,steelwidth], center=true);
+        //Fishplate middle square
+     color([0.3,0.2,0.3])translate([n*(gaugemm/2-steelwidth/2),0,steelheigth/2])cube([steelwidth,steelheigth,steelheigth], center=true); 
+    difference(){
+        //Pipe outer object
+         color([0.3,0.6,0.2])translate([n*(gaugemm/2+steelwidth+pipediameter/2),0,steelheigth-(sleeperheigth+steelheigth)/2])cylinder(sleeperheigth+steelheigth,pipediameter/2,pipediameter/2, center=true);
+        //Pipe inner object to be subtracted
+    translate([n*(gaugemm/2+steelwidth+pipediameter/2),0,steelheigth-(sleeperheigth+steelheigth)/2])cylinder(sleeperheigth+steelheigth,pipediameterinner/2,pipediameterinner/2, center=true);
+    }
+                }  
+                //Holes for screws
+    translate([0,0,steelheigth/2])rotate([0,90,0])cylinder(sleeperlength,screwdiameter/2,screwdiameter/2, center=true);
+                //Slots for screwing the straight or turn into
+    translate([0,90,steelheigth/2])cube([2*sleeperlength,steelheigth,steelwidth], center=true);
+    translate([0,-90,steelheigth/2])cube([2*sleeperlength,steelheigth,steelwidth], center=true);
+                }
+                //Bolt heads
+                intersection(){
+                    color([0.7,0.8,0.1])translate([n*(gaugemm/2-2*steelwidth),0,steelheigth/2])rotate([0,90,0])cylinder(screwhead/2,screwhead/2,screwhead/2, center=true);
+                    color([0.7,0.8,0.1])translate([n*(gaugemm/2+0.5*steelwidth),0,steelheigth/2])rotate([0,90,0])sphere(screwhead/2+steelwidth);
+                }
+                //The threaded part of the bolt
+                color([0.7,0.8,0.1])translate([n*(gaugemm/2+3.5*steelwidth),0,steelheigth/2])rotate([0,90,0])cylinder(pipediameter+steelwidth+nutheigth*3,screwdiameter/2,screwdiameter/2, center=true);
+                //Square nut
+                color([0.7,0.8,0.6])translate([n*(gaugemm/2+steelwidth+pipediameter+nutheigth/2),0,steelheigth/2])rotate([0,90,0])cube([nutdimention,nutdimention,nutheigth], center=true);
+}
+    }
+echo ("Sleepers should be ",sleeperlength/10," cm long");
