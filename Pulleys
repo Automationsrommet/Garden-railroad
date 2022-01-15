@@ -1,0 +1,53 @@
+//Written by Sveinar Sandvin in july 2021.
+
+//Input parameters: 
+
+
+motorpulley=30;
+drivepulley=120;
+beltlength=700;
+pulleymargin=10;
+shaft=8;
+pipediameter=16;
+detail=100;      //should be above 100 for final render
+includetext=1;  //1 or 0 here displays text or not
+
+//Output parameters: 
+pulleydistance=sqrt((beltlength/2-(drivepulley*PI/4+motorpulley*PI/4))*(beltlength/2-(drivepulley*PI/4+motorpulley*PI/4))-(drivepulley-motorpulley)*(drivepulley-motorpulley));
+
+$fn=detail;
+
+module pulley(diameter,innerdiameter){
+    difference(){
+    rotate([90,0,0]){
+ cylinder(16,diameter/2+pulleymargin,diameter/2+pulleymargin,center=true); 
+      cylinder(innerdiameter*3,innerdiameter,innerdiameter,center=true);
+        sphere(innerdiameter*1.6);} 
+        rotate([90,0,0])
+ cylinder(innerdiameter*4,innerdiameter/2,innerdiameter/2,center=true);
+       union(){for (i=[0:360/detail:360]){
+           rotate([0,i,0])
+           translate([0,0,diameter/2+pulleymargin/2])rotate([0,0,6])
+           cube([diameter*1.5,pulleymargin/2, pulleymargin], center=true);
+           for (j=[-1:2:1]){
+               for (k=[-1:2:1]){
+               rotate([0,j*45,0])translate([0, k*innerdiameter,0])cube([innerdiameter/4,innerdiameter/4,diameter],center=true);    
+                rotate([0,45,0])translate([j*innerdiameter/2, 0,k*innerdiameter/2])rotate([0,45,0])cube([innerdiameter/8,diameter,innerdiameter/8],center=true); 
+}}}}}}
+translate([-pulleydistance, 0,0])pulley(drivepulley,pipediameter);
+pulley(motorpulley, shaft);
+
+union(){
+    translate([-2*motorpulley, 0,2*motorpulley])rotate([90,0,0])linear_extrude(4*includetext)
+    text(str("V-belt is ",beltlength," mm long."));
+    
+translate([2*motorpulley, 0,20])rotate([90,0,0])linear_extrude(4*includetext)
+    text("Distance between"); 
+    translate([2*motorpulley, 0,00])rotate([90,0,0])linear_extrude(4*includetext)
+    text("pulleys is ");
+    translate([2*motorpulley, 0,-20])rotate([90,0,0])linear_extrude(4*includetext)
+    text(str(pulleydistance," mm"));
+    }
+
+echo("Pulley distance in millimeters is ");
+echo(pulleydistance);
