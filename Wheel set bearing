@@ -1,0 +1,64 @@
+//Bearing for each rotating train-wheel-set that needs to be able to turn in order to follow the tracks. I intend to use plastic softgun balls that i got at a sports equipment store, inspired by the Airsoft Pellet Bearing Kite Reel Winder at Thingiverse
+//the bolt used should be locked width an extra nut, I think.
+
+//turn the different parts on or off here:
+top();
+bottom();
+end();
+balls();
+
+//input parameters
+
+screwlength=100;
+boltdiameter=8;
+outerdiameter=180;
+basethickness=3;
+holemargin=1;
+ballsize=8;
+showballs=1;
+grooves=4;
+detail=19;
+
+$fn=detail;
+module balls (){
+        color("white")for (j=[0:1:grooves+1]){
+                for (i=[0:7*(grooves-j):360]){
+  rotate([0,0,i])translate([((outerdiameter/2)/(grooves+1))*(j+1),0,0])sphere(ballsize/2*showballs); 
+                    rotate([0,0,i%6*60])translate([((outerdiameter/2)/(grooves+1))*0.5,0,-(ballsize+basethickness+holemargin)/2-1])sphere(ballsize/2*showballs+0.2); 
+}}}
+module top(){difference(){
+    translate([0,0,(ballsize/2+basethickness-holemargin)/2+1])cylinder(ballsize/2+basethickness-holemargin,outerdiameter/2,outerdiameter/2,center=true);
+for (j=[0:1:grooves-1]){
+                for (i=[0:1:360]){
+  rotate([0,0,i*(50/detail)])translate([((outerdiameter/2)/(grooves+1))*(j+1),0,0])sphere(ballsize/2*showballs+0.2); 
+rotate([0,0,i*(50/detail)])translate([((outerdiameter/2)/(grooves+1))*0.5,0,-(ballsize+basethickness+holemargin)/2-1])sphere(ballsize/2*showballs+0.2); 
+rotate([0,0,(i%5)*72])translate([(outerdiameter/2)-10,0,(ballsize/2+basethickness-holemargin)/2+1]){cylinder(20,1,1,center=true);
+    cylinder(20,7,0,center=true);
+}}
+}
+cylinder(20,boltdiameter/2+holemargin/2,boltdiameter/2+holemargin/2,center=true);
+}
+}
+module bottom(){difference(){
+    translate([0,0,-(ballsize/2+basethickness-holemargin)/2-1])cylinder(ballsize/2+basethickness-holemargin,outerdiameter/2,outerdiameter/2,center=true);
+for (j=[0:1:grooves-1]){
+                for (i=[0:1:360]){
+  rotate([0,0,i*(50/detail)])translate([((outerdiameter/2)/(grooves+1))*(j+1),0,0])sphere(ballsize/2*showballs+0.2); 
+rotate([0,0,i*(50/detail)])translate([((outerdiameter/2)/(grooves+1))*0.5,0,-(ballsize+basethickness+holemargin)/2-1])sphere(ballsize/2*showballs+0.2); 
+rotate([0,0,(i%5)*72])translate([(outerdiameter/2)-10,0,-(ballsize/2+basethickness-holemargin)/2-1]){cylinder(20,1,1,center=true);
+    cylinder(20,0,7,center=true);
+}}
+}
+cylinder(20,boltdiameter/2+holemargin/2,boltdiameter/2+holemargin/2,center=true);
+}
+}
+
+module end(){
+   difference(){
+    translate([0,0,-(ballsize/2+basethickness-holemargin)*2-1])cylinder(ballsize/2+basethickness-holemargin,outerdiameter/10,outerdiameter/10,center=true);
+for (j=[0:1:grooves-1]){
+                for (i=[0:1:360]){
+rotate([0,0,i*(50/detail)])translate([((outerdiameter/2)/(grooves+1))*0.5,0,-(ballsize+basethickness+holemargin)/2-1])sphere(ballsize/2*showballs+0.2); 
+}}
+cylinder(40,boltdiameter/2+holemargin/2,boltdiameter/2+holemargin/2,center=true);
+}}
