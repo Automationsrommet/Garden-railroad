@@ -1,0 +1,55 @@
+//Bearing garden train wheels. I intend to use plastic softgun balls that i got at a sports equipment store, inspired by the Airsoft Pellet Bearing Kite Reel Winder at Thingiverse
+
+//input parameters
+
+axeldiameter=27.7;
+screwdiameter=8;
+outerdiameter=64;
+basethickness=3;
+holemargin=1;
+ballsize=6;
+showballs=1;
+detail=52;
+
+$fn=detail;
+module balls (){
+        color("white")
+                for (i=[0:7:360]){
+  rotate([0,0,i*30])translate([((outerdiameter/2)-basethickness-ballsize/2-screwdiameter),0,0])sphere(ballsize/2*showballs); 
+}}
+module inner(){difference(){union(){
+    translate([0,0,(ballsize+basethickness+holemargin*3)/2+1])cylinder(ballsize+basethickness-holemargin,outerdiameter/2,outerdiameter/2,center=true);
+    translate([0,0,ballsize/2-holemargin*1.5])cylinder(ballsize,axeldiameter*0.75,axeldiameter*0.75,center=true);
+}
+for (i=[0:1:detail]){
+  rotate([0,0,(360/detail)*i])translate([((outerdiameter/2)-ballsize/2-screwdiameter),0,0])rotate([90,0,0])cylinder((((outerdiameter/2)-ballsize/2-screwdiameter)*PI*2.1)/detail,ballsize/2*showballs+0.2,ballsize/2*showballs+0.2,center=true);  
+rotate([0,0,(i%5)*72])translate([(outerdiameter/2)-5,0,(ballsize/2+basethickness-holemargin)/2+1])rotate([0,0,30]){cylinder(20,2,2,center=true);
+cylinder(6,4*1.181,4*1.181,$fn=6,center=true);
+}
+//akselskruer
+rotate([0,0,(i%5)*72+36])translate([(outerdiameter/2),0,(ballsize+basethickness+holemargin*3)/2+1])rotate([0,-90,0]){cylinder(50,1,2,center=true);
+    cylinder(10,5,2,center=true);
+}
+}
+cylinder(60,axeldiameter/2+holemargin,axeldiameter/2+holemargin,center=true);
+}
+}
+module outer(){difference(){
+    translate([0,0,-(ballsize/2+basethickness-holemargin)/2-1])cylinder(ballsize/2+basethickness-holemargin,outerdiameter/2,outerdiameter/2,center=true);
+               for (i=[0:1:detail]){
+  rotate([0,0,(360/detail)*i])translate([((outerdiameter/2)-ballsize/2-screwdiameter),0,-1.7])rotate([90,0,0])cylinder((((outerdiameter/2)-ballsize/2-screwdiameter)*PI*2.3)/detail,ballsize/2*showballs+0.2,ballsize/2*showballs+0.2,center=true);  
+rotate([0,0,(i%5)*72])translate([(outerdiameter/2)-4.5,0,(ballsize/2+basethickness-holemargin)/2+1]){cylinder(20,2,2,center=true);
+cylinder(6,4,4,$fn=6,center=true);
+}
+
+}
+cylinder(20,axeldiameter/2+holemargin*2,axeldiameter/2+holemargin*2,center=true);
+cylinder(ballsize+4,axeldiameter*0.7,axeldiameter*0.7,center=true);
+}
+}
+module axel(){
+    cylinder (ballsize+2*basethickness+2*axeldiameter, axeldiameter/2,axeldiameter/2, center=true);
+}
+
+translate([0,0,12])inner();
+outer();
